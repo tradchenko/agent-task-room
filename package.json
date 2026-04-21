@@ -4,7 +4,20 @@
   "description": "Общая task-room сессия для совместного обсуждения задач и аудита между агентами с разным контекстом.",
   "type": "module",
   "bin": {
-    "agent-task-room": "./dist/bin/agent-task-room.js"
+    "agent-task-room": "dist/bin/agent-task-room.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tradchenko/agent-task-room.git"
+  },
+  "homepage": "https://github.com/tradchenko/agent-task-room#readme",
+  "bugs": {
+    "url": "https://github.com/tradchenko/agent-task-room/issues"
   },
   "engines": {
     "node": ">=22.5.0"
@@ -28,8 +41,11 @@
     "collaboration",
     "task-room"
   ],
-  "author": "",
+  "author": "Timur Tradchenko",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@a2a-js/sdk": "^0.3.13",
     "@modelcontextprotocol/sdk": "^1.29.0",
