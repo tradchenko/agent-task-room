@@ -27,11 +27,13 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "cli": "node dist/bin/agent-task-room.js",
     "server": "node dist/server/index.js",
-    "check": "tsc -p tsconfig.json --noEmit && vitest run",
+    "check": "npm run compile && vitest run && playwright test",
     "doctor": "npm run compile && node dist/bin/agent-task-room.js doctor",
     "link:local": "npm run compile && npm link",
     "prepublishOnly": "npm run check && npm run compile",
-    "test": "vitest run",
+    "test": "npm run compile && vitest run",
+    "test:e2e": "npm run compile && playwright test",
+    "test:e2e:install": "playwright install chromium",
     "test:watch": "vitest"
   },
   "keywords": [
@@ -53,6 +55,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@types/express": "^5.0.3",
     "@types/node": "^24.9.1",
     "typescript": "^5.9.3",

@@ -391,7 +391,7 @@ export class WebUiRenderer {
       </div>
     </div>
 
-    <script type="module" src="/assets/task-room-ui.js"></script>
+    <script type="module" src="/static/infrastructure/http/ui/TaskRoomBrowserApp.js"></script>
   </body>
 </html>`;
   }

@@ -198,18 +198,22 @@ describe('TaskRoomHttpServer', () => {
     ).toBe(true);
   });
 
-  it('отдаёт отдельный ui-ассет и главная страница ссылается на него', async () => {
+  it('отдаёт статический ui-модуль и legacy entrypoint для уже открытых страниц', async () => {
     const htmlResponse = await fetch(`${server.baseUrl}/`);
     const html = await htmlResponse.text();
-    const assetResponse = await fetch(`${server.baseUrl}/assets/task-room-ui.js`);
-    const assetBody = await assetResponse.text();
+    const moduleResponse = await fetch(`${server.baseUrl}/static/infrastructure/http/ui/TaskRoomBrowserApp.js`);
+    const moduleBody = await moduleResponse.text();
+    const legacyAssetResponse = await fetch(`${server.baseUrl}/assets/task-room-ui.js`);
+    const legacyAssetBody = await legacyAssetResponse.text();
 
     expect(htmlResponse.status).toBe(200);
-    expect(html).toContain('/assets/task-room-ui.js');
+    expect(html).toContain('/static/infrastructure/http/ui/TaskRoomBrowserApp.js');
     expect(html).toContain('quickActionRequestContextButton');
     expect(html).toContain('quickActionCopyJoinCommandButton');
-    expect(assetResponse.status).toBe(200);
-    expect(assetBody).toContain('class TaskRoomBrowserApp');
+    expect(moduleResponse.status).toBe(200);
+    expect(moduleBody).toContain('class TaskRoomBrowserApp');
+    expect(legacyAssetResponse.status).toBe(200);
+    expect(legacyAssetBody).toContain('/static/infrastructure/http/ui/TaskRoomBrowserApp.js');
   });
 
   it('отдаёт join-страницу для браузерного invite flow', async () => {

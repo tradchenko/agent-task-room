@@ -48,15 +48,13 @@ interface LaunchPayload {
 }
 
 const SERVER_FILE = fileURLToPath(import.meta.url);
-const ASSET_FILE = path.resolve(path.dirname(SERVER_FILE), 'ui/TaskRoomBrowserApp.js');
-const FALLBACK_ASSET_SOURCE = `
-class TaskRoomBrowserApp {
-  boot() {
-    console.warn('TaskRoomBrowserApp fallback asset is active.');
-  }
-}
-new TaskRoomBrowserApp().boot();
-`;
+const CURRENT_DIST_ROOT = path.resolve(path.dirname(SERVER_FILE), '../..');
+const PROJECT_DIST_ROOT = path.resolve(path.dirname(SERVER_FILE), '../../../dist');
+const DIST_ROOT = fs.existsSync(path.join(CURRENT_DIST_ROOT, 'infrastructure/http/ui/TaskRoomBrowserApp.js'))
+  ? CURRENT_DIST_ROOT
+  : PROJECT_DIST_ROOT;
+const LEGACY_UI_ENTRY_SOURCE =
+  "import '/static/infrastructure/http/ui/TaskRoomBrowserApp.js';\n";
 
 function readJsonIfExists<T>(filePath: string): T | null {
   if (!fs.existsSync(filePath)) {
@@ -353,15 +351,12 @@ export class TaskRoomHttpServer {
       response.type('html').send(this.renderer.render());
     });
 
+    // Отдаём весь dist как readonly static root, чтобы ESM-импорты UI
+    // разрешались браузером без ручного перечисления каждого вложенного модуля.
+    this.app.use('/static', express.static(DIST_ROOT, { fallthrough: false }));
+
     this.app.get('/assets/task-room-ui.js', (_request, response) => {
-      response.type('application/javascript');
-
-      if (fs.existsSync(ASSET_FILE)) {
-        response.send(fs.readFileSync(ASSET_FILE, 'utf8'));
-        return;
-      }
-
-      response.send(FALLBACK_ASSET_SOURCE);
+      response.type('application/javascript').send(LEGACY_UI_ENTRY_SOURCE);
     });
 
     this.app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
