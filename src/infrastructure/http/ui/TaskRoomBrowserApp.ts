@@ -308,9 +308,12 @@ export class TaskRoomBrowserApp {
     });
 
     this.elements.copyPeerInviteButton.addEventListener('click', () => {
+      const isPeerParticipantView = Boolean(this.state.route.participant) && this.state.route.promptMode === 'peer';
       void this.copyQuickActionValue(
         this.resolveShareLink(),
-        this.state.route.inviteMode
+        isPeerParticipantView
+          ? 'Ссылка на комнату скопирована.'
+          : this.state.route.inviteMode
           ? 'Ссылка на комнату скопирована.'
           : 'Ссылка второму участнику скопирована.',
         'Для этой комнаты пока нет подходящей ссылки.',
@@ -560,6 +563,7 @@ export class TaskRoomBrowserApp {
     const activePrompt = this.resolveActivePrompt();
     const participant = this.state.route.participant;
     const joined = this.isInvitedParticipantJoined();
+    const isPeerParticipantView = Boolean(participant) && this.state.route.promptMode === 'peer';
 
     this.elements.agentPromptPreview.textContent =
       activePrompt || 'Сначала выбери комнату или открой invite-ссылку. После этого здесь появится готовая инструкция для агента.';
@@ -580,7 +584,7 @@ export class TaskRoomBrowserApp {
       return;
     }
 
-    if (this.state.route.inviteMode) {
+    if (isPeerParticipantView) {
       const label = participant?.participantLabel || 'участник';
       const role = participant?.role || 'peer';
       this.elements.inviteTitle.textContent = 'Приглашение в комнату';
@@ -602,7 +606,7 @@ export class TaskRoomBrowserApp {
       );
       this.elements.joinRoomButton.hidden = false;
       this.elements.joinRoomButton.textContent = joined ? 'Уже подключено' : 'Подключиться к комнате';
-      this.elements.joinRoomButton.disabled = joined || !participant;
+      this.elements.joinRoomButton.disabled = joined || !participant || !this.state.route.inviteMode;
       this.elements.copyAgentPromptButton.hidden = !activePrompt;
       this.elements.copyPeerInviteButton.hidden = false;
       this.elements.copyPeerInviteButton.textContent = 'Скопировать ссылку на комнату';
@@ -878,7 +882,7 @@ export class TaskRoomBrowserApp {
   private resolveShareLink(): string {
     const launchScope = this.resolveLaunchScope();
 
-    if (this.state.route.inviteMode) {
+    if (this.state.route.inviteMode || (this.state.route.participant && this.state.route.promptMode === 'peer')) {
       return this.buildInviteAwareRoomLink();
     }
 

@@ -150,9 +150,12 @@ export class TaskRoomBrowserApp {
             void this.copyQuickActionValue(this.resolveActivePrompt(), 'Инструкция для агента скопирована.', 'Для этой комнаты пока нет готовой инструкции для агента.', 'invite');
         });
         this.elements.copyPeerInviteButton.addEventListener('click', () => {
-            void this.copyQuickActionValue(this.resolveShareLink(), this.state.route.inviteMode
+            const isPeerParticipantView = Boolean(this.state.route.participant) && this.state.route.promptMode === 'peer';
+            void this.copyQuickActionValue(this.resolveShareLink(), isPeerParticipantView
                 ? 'Ссылка на комнату скопирована.'
-                : 'Ссылка второму участнику скопирована.', 'Для этой комнаты пока нет подходящей ссылки.', 'invite');
+                : this.state.route.inviteMode
+                    ? 'Ссылка на комнату скопирована.'
+                    : 'Ссылка второму участнику скопирована.', 'Для этой комнаты пока нет подходящей ссылки.', 'invite');
         });
         this.elements.sendMessageButton.addEventListener('click', () => {
             void this.sendHumanMessage();
@@ -333,6 +336,7 @@ export class TaskRoomBrowserApp {
         const activePrompt = this.resolveActivePrompt();
         const participant = this.state.route.participant;
         const joined = this.isInvitedParticipantJoined();
+        const isPeerParticipantView = Boolean(participant) && this.state.route.promptMode === 'peer';
         this.elements.agentPromptPreview.textContent =
             activePrompt || 'Сначала выбери комнату или открой invite-ссылку. После этого здесь появится готовая инструкция для агента.';
         if (!this.state.roomId) {
@@ -350,7 +354,7 @@ export class TaskRoomBrowserApp {
             this.setInviteStatus('Пока нет выбранной комнаты.', false);
             return;
         }
-        if (this.state.route.inviteMode) {
+        if (isPeerParticipantView) {
             const label = participant?.participantLabel || 'участник';
             const role = participant?.role || 'peer';
             this.elements.inviteTitle.textContent = 'Приглашение в комнату';
@@ -370,7 +374,7 @@ export class TaskRoomBrowserApp {
                 ]);
             this.elements.joinRoomButton.hidden = false;
             this.elements.joinRoomButton.textContent = joined ? 'Уже подключено' : 'Подключиться к комнате';
-            this.elements.joinRoomButton.disabled = joined || !participant;
+            this.elements.joinRoomButton.disabled = joined || !participant || !this.state.route.inviteMode;
             this.elements.copyAgentPromptButton.hidden = !activePrompt;
             this.elements.copyPeerInviteButton.hidden = false;
             this.elements.copyPeerInviteButton.textContent = 'Скопировать ссылку на комнату';
@@ -591,7 +595,7 @@ export class TaskRoomBrowserApp {
     }
     resolveShareLink() {
         const launchScope = this.resolveLaunchScope();
-        if (this.state.route.inviteMode) {
+        if (this.state.route.inviteMode || (this.state.route.participant && this.state.route.promptMode === 'peer')) {
             return this.buildInviteAwareRoomLink();
         }
         return launchScope.peerInviteUrl || launchScope.roomLink;
