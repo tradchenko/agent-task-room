@@ -53,6 +53,10 @@ describe('DefaultTaskRoomCliRuntime', () => {
     systemUtilsMocks.getRoomServerHealth.mockResolvedValue({
       ok: true,
       service: 'agent-task-room',
+      serverPid: 888,
+      storage: {
+        file: '/another/.agent-task-room/rooms.sqlite',
+      },
     });
     systemUtilsMocks.readPid.mockReturnValue(null);
     systemUtilsMocks.isProcessAlive.mockReturnValue(false);
@@ -70,6 +74,66 @@ describe('DefaultTaskRoomCliRuntime', () => {
       }),
     ).rejects.toThrow(/PID/i);
 
+    expect(systemUtilsMocks.spawnDetached).not.toHaveBeenCalled();
+  });
+
+  it('подхватывает уже живой сервер без локального PID, если health указывает тот же storage', async () => {
+    const statePaths = new StatePaths(tempDirectory);
+
+    systemUtilsMocks.getRoomServerHealth.mockResolvedValue({
+      ok: true,
+      service: 'agent-task-room',
+      serverPid: 888,
+      storage: {
+        file: statePaths.storageFile,
+      },
+    });
+    systemUtilsMocks.readPid.mockReturnValue(null);
+    systemUtilsMocks.isProcessAlive.mockImplementation((pid: number | null) => pid === 888);
+
+    const runtime = new DefaultTaskRoomCliRuntime();
+    const started = await runtime.startServer({
+      host: '127.0.0.1',
+      port: 8876,
+      mcpPath: '/mcp',
+      token: 'secret-token',
+      cwd: tempDirectory,
+      statePaths,
+    });
+
+    expect(started.pid).toBe(888);
+    expect(started.baseUrl).toBe('http://127.0.0.1:8876');
+    expect(systemUtilsMocks.spawnDetached).not.toHaveBeenCalled();
+  });
+
+  it('подхватывает уже живой сервер, если storage совпадает через symlink-путь', async () => {
+    const statePaths = new StatePaths(tempDirectory);
+    const symlinkDirectory = `${tempDirectory}-link`;
+
+    await fs.symlink(tempDirectory, symlinkDirectory);
+
+    systemUtilsMocks.getRoomServerHealth.mockResolvedValue({
+      ok: true,
+      service: 'agent-task-room',
+      serverPid: 999,
+      storage: {
+        file: path.join(symlinkDirectory, '.agent-task-room', 'rooms.sqlite'),
+      },
+    });
+    systemUtilsMocks.readPid.mockReturnValue(null);
+    systemUtilsMocks.isProcessAlive.mockImplementation((pid: number | null) => pid === 999);
+
+    const runtime = new DefaultTaskRoomCliRuntime();
+    const started = await runtime.startServer({
+      host: '127.0.0.1',
+      port: 8876,
+      mcpPath: '/mcp',
+      token: 'secret-token',
+      cwd: tempDirectory,
+      statePaths,
+    });
+
+    expect(started.pid).toBe(999);
     expect(systemUtilsMocks.spawnDetached).not.toHaveBeenCalled();
   });
 

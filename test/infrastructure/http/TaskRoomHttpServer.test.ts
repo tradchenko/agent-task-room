@@ -52,11 +52,12 @@ describe('TaskRoomHttpServer', () => {
 
   it('отдаёт health-ответ', async () => {
     const response = await fetch(`${server.baseUrl}/health`);
-    const payload = (await response.json()) as { ok: boolean; service: string };
+    const payload = (await response.json()) as { ok: boolean; service: string; serverPid?: number };
 
     expect(response.status).toBe(200);
     expect(payload.ok).toBe(true);
     expect(payload.service).toBe('agent-task-room');
+    expect(payload.serverPid).toBeTypeOf('number');
   });
 
   it('объясняет назначение MCP endpoint при GET-запросе', async () => {

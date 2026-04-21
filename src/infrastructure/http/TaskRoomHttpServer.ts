@@ -138,6 +138,7 @@ export class TaskRoomHttpServer {
       response.json({
         ok: true,
         service: 'agent-task-room',
+        serverPid: process.pid,
         rooms: rooms.rooms.length,
         mcpPath: this.options.mcpPath,
         auth: this.options.sharedToken ? 'bearer' : 'none',

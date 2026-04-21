@@ -49,8 +49,22 @@ export class DefaultTaskRoomCliRuntime implements TaskRoomCliRuntime {
     }
 
     if (existingHealth) {
+      const adoptedPid = this.getAdoptableServerPid(existingHealth, params.statePaths.storageFile);
+
+      if (adoptedPid) {
+        return {
+          pid: adoptedPid,
+          baseUrl: localBaseUrl,
+          mcpUrl: `${localBaseUrl}${params.mcpPath}`,
+        };
+      }
+
+      const conflictingStorage = this.getHealthStorageFile(existingHealth);
+      const conflictingPid = this.getHealthPid(existingHealth);
+
       throw new Error(
         'На этом адресе уже отвечает agent-task-room, но локальный PID-файл отсутствует или устарел. ' +
+          `Конфликтующий сервер: pid=${conflictingPid ?? 'unknown'}, storage=${conflictingStorage ?? 'unknown'}. ` +
           'Остановите конфликтующий сервер вручную и повторите start.',
       );
     }
@@ -212,5 +226,64 @@ export class DefaultTaskRoomCliRuntime implements TaskRoomCliRuntime {
     }
 
     return null;
+  }
+
+  private getAdoptableServerPid(health: Record<string, unknown>, expectedStorageFile: string): number | null {
+    const healthPid = this.getHealthPid(health);
+    const healthStorageFile = this.getHealthStorageFile(health);
+
+    if (!healthPid || !healthStorageFile) {
+      return null;
+    }
+
+    if (!isProcessAlive(healthPid)) {
+      return null;
+    }
+
+    if (this.normalizeStorageFile(healthStorageFile) !== this.normalizeStorageFile(expectedStorageFile)) {
+      return null;
+    }
+
+    return healthPid;
+  }
+
+  private getHealthPid(health: Record<string, unknown>): number | null {
+    const pid = Number(health.serverPid);
+    return Number.isInteger(pid) && pid > 0 ? pid : null;
+  }
+
+  private getHealthStorageFile(health: Record<string, unknown>): string | null {
+    const storage = health.storage;
+
+    if (!storage || typeof storage !== 'object') {
+      return null;
+    }
+
+    const file = (storage as { file?: unknown }).file;
+    return typeof file === 'string' && file.length > 0 ? file : null;
+  }
+
+  private normalizeStorageFile(filePath: string): string {
+    const resolved = path.resolve(filePath);
+    const missingSegments: string[] = [];
+    let existingPath = resolved;
+
+    while (!fs.existsSync(existingPath)) {
+      const parentPath = path.dirname(existingPath);
+
+      if (parentPath === existingPath) {
+        return resolved;
+      }
+
+      missingSegments.unshift(path.basename(existingPath));
+      existingPath = parentPath;
+    }
+
+    try {
+      const realExistingPath = fs.realpathSync.native(existingPath);
+      return path.join(realExistingPath, ...missingSegments);
+    } catch {
+      return resolved;
+    }
   }
 }
