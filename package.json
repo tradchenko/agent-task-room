@@ -1,0 +1,45 @@
+{
+  "name": "agent-task-room",
+  "version": "0.1.0",
+  "description": "Общая task-room сессия для совместного обсуждения задач и аудита между агентами с разным контекстом.",
+  "type": "module",
+  "bin": {
+    "agent-task-room": "./dist/bin/agent-task-room.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "cli": "node dist/bin/agent-task-room.js",
+    "server": "node dist/server/index.js",
+    "check": "tsc -p tsconfig.json --noEmit && vitest run",
+    "doctor": "npm run build && node dist/bin/agent-task-room.js doctor",
+    "link:local": "npm run build && npm link",
+    "prepare": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "agents",
+    "mcp",
+    "audit",
+    "collaboration",
+    "task-room"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@a2a-js/sdk": "^0.3.13",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "express": "^5.2.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

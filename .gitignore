@@ -1,0 +1,7 @@
+node_modules
+dist
+.agent-task-room
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
