@@ -1,0 +1,1 @@
+{"version":3,"file":"TaskRoomAgentPrompt.js","sourceRoot":"","sources":["../../src/shared/TaskRoomAgentPrompt.ts"],"names":[],"mappings":"AAAA,MAAM,UAAU,wBAAwB,CAAC,SAAiB;IACxD,OAAO;QACL,6CAA6C,SAAS,GAAG;QACzD,4EAA4E;QAC5E,yLAAyL;QACzL,sEAAsE;QACtE,2HAA2H;QAC3H,oHAAoH;QACpH,4JAA4J;QAC5J,wGAAwG;QACxG,qHAAqH;QACrH,mHAAmH;QACnH,qGAAqG;KACtG,CAAC,IAAI,CAAC,IAAI,CAAC,CAAC;AACf,CAAC"}

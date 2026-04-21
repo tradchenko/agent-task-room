@@ -52,11 +52,24 @@
 
 ```bash
 npm install
-npm run build
+npm run compile
 npm run link:local
 ```
 
 После `npm link` команда `agent-task-room` станет доступна из других проектов на этой машине.
+
+## Установка из GitHub
+
+Пока пакет ещё не опубликован в `npm`, его можно ставить напрямую из GitHub:
+
+```bash
+npm install -g https://codeload.github.com/tradchenko/agent-task-room/tar.gz/main
+agent-task-room help
+```
+
+В репозиторий уже включён предсобранный `dist`, поэтому такая установка не должна зависеть от локального `prepare`-цикла и dev-зависимостей на машине коллеги.
+
+Если `npm install -g git+https://github.com/...` падает на `git dep preparation failed`, это обычно связано не с самим пакетом, а с внутренним install-cycle конкретной версии `npm`. Установка через `codeload.github.com/.../tar.gz/main` обходит этот путь и работает надёжнее.
 
 ## Быстрая проверка
 

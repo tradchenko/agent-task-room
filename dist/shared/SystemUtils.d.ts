@@ -1,0 +1,24 @@
+export declare function ensureDir(directoryPath: string): void;
+export declare function readJsonIfExists<T>(filePath: string): T | null;
+export declare function readTextIfExists(filePath: string): string | null;
+export declare function writeJson(filePath: string, payload: unknown): void;
+export declare function writeText(filePath: string, payload: string): void;
+export declare function readPid(filePath: string): number | null;
+export declare function isProcessAlive(pid: number | null): boolean;
+export declare function terminateProcess(pid: number | null, signal?: NodeJS.Signals): boolean;
+export declare function sleep(ms: number): Promise<void>;
+export declare function waitFor<T>(checker: () => Promise<T | null | undefined> | T | null | undefined, options: {
+    timeoutMs?: number;
+    intervalMs?: number;
+    label: string;
+}): Promise<T>;
+export declare function waitForExit(pid: number, timeoutMs?: number): Promise<void>;
+export declare function spawnDetached(command: string, args: string[], logFile: string, env: NodeJS.ProcessEnv, cwd: string): number;
+export declare function openBrowserUrl(url: string): Promise<void>;
+export declare function shellEscape(value: string): string;
+export declare function powerShellEscape(value: string): string;
+export declare function fetchJson<T>(url: string, init?: RequestInit): Promise<T>;
+export declare function getRoomServerHealth(baseUrl: string): Promise<Record<string, unknown> | null>;
+export declare function resolveNgrokBinary(explicitBinary?: string | undefined): string | null;
+export declare function buildNgrokInstallHelp(): string;
+export declare function formatTimestamp(): string;

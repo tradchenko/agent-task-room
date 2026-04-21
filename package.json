@@ -23,14 +23,14 @@
     "node": ">=22.5.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.json",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "cli": "node dist/bin/agent-task-room.js",
     "server": "node dist/server/index.js",
     "check": "tsc -p tsconfig.json --noEmit && vitest run",
-    "doctor": "npm run build && node dist/bin/agent-task-room.js doctor",
-    "link:local": "npm run build && npm link",
-    "prepare": "npm run build",
+    "doctor": "npm run compile && node dist/bin/agent-task-room.js doctor",
+    "link:local": "npm run compile && npm link",
+    "prepublishOnly": "npm run check && npm run compile",
     "test": "vitest run",
     "test:watch": "vitest"
   },
