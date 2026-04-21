@@ -23,6 +23,7 @@ let serverBaseUrl = '';
 let ownerRoomUrl = '';
 let peerInviteUrl = '';
 let stopServer: (() => Promise<void>) | null = null;
+let rootUrl = '';
 
 async function expectClipboardToContain(page: Page, text: string): Promise<void> {
   await expect
@@ -119,6 +120,7 @@ test.beforeAll(async () => {
 
   ownerRoomUrl = buildRoomUrl(HOST_PARTICIPANT, 'local');
   peerInviteUrl = buildInviteUrl(PEER_PARTICIPANT, 'peer');
+  rootUrl = `${serverBaseUrl}/?token=${encodeURIComponent(TOKEN)}`;
 
   await fs.writeFile(
     path.join(tempDirectory, 'launch.json'),
@@ -225,6 +227,19 @@ test('room page гидратируется и quick actions реально ра�
 
   await page.locator('#quickActionRequestFinalPositionsButton').click();
   await expect(page.locator('#messageList')).toContainText('Нужны финальные позиции');
+});
+
+test('корневая страница позволяет выбрать комнату из списка и перейти в неё', async ({ page }) => {
+  await page.goto(rootUrl, { waitUntil: 'networkidle' });
+
+  await expect(page.locator('#roomTitle')).toHaveText('Проверка browser flow');
+  await expect(page.locator('#roomList')).toContainText('Проверка browser flow');
+
+  const roomLink = page.locator('.room-link').first();
+  await roomLink.click();
+
+  await expect(page).toHaveURL(new RegExp(`/rooms/${roomId}`));
+  await expect(page.locator('#roomTitle')).toHaveText('Проверка browser flow');
 });
 
 test('invite-страница подключает второго участника и показывает следующий шаг', async ({ context, page }) => {
